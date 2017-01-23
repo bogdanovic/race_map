@@ -190,3 +190,11 @@ html, body {
 .mdl-demo .mdl-menu__container {
   z-index: 99;
 }
+
+
+.map-container{
+  height: 500px;
+  #map {
+    height: 100%;
+  }
+}

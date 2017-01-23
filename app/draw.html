@@ -83,124 +83,77 @@
                   function initMap() {
                     var map = new google.maps.Map(document.getElementById('map'), {
                       zoom: 3,
-                      center: {lat: 0, lng: -170},
+                      center: {lat: 0, lng: -180},
                       mapTypeId: 'terrain'
                     });
 
-                    var sailingArray = [
-                      [
-                        { id: "sailor_1", locations:{lat: 37.772, lng: -122.214}},
-                        { id: "sailor_2", locations:{lat: 37.772, lng: -122.214}},
-                        { id: "sailor_3", locations:{lat: 37.772, lng: -122.214}},
-                        { id: "sailor_4", locations:{lat: 37.772, lng: -122.214}},
-                        { id: "sailor_5", locations:{lat: 37.772, lng: -122.214}},
-                        { id: "sailor_6", locations:{lat: 37.772, lng: -122.214}}
-                      ],
-                      [
-                        { id: "sailor_1", locations:{lat: 21.291, lng: -157.821}},
-                        { id: "sailor_2", locations:{lat: 20.291, lng: -156.821}},
-                        { id: "sailor_3", locations:{lat: 21.24, lng: -153.821}},
-                        { id: "sailor_4", locations:{lat: 20.231, lng: -160.83}},
-                        { id: "sailor_5", locations:{lat: 20.291, lng: -160.821}},
-                        { id: "sailor_6", locations:{lat: 21.231, lng: -153.83}}
-                      ],
-                      [
-                        { id: "sailor_1", locations:{lat: -18.444, lng: 178.444}},
-                        { id: "sailor_2", locations:{lat: -17.142, lng: 172.431}},
-                        { id: "sailor_3", locations:{lat: -21.24, lng: 170.821}},
-                        { id: "sailor_4", locations:{lat: -17.232, lng: 172.221}},
-                        { id: "sailor_5", locations:{lat: -18.232, lng: 173.221}},
-                        { id: "sailor_6", locations:{lat: -18.142, lng: 174.431}}
-                      ],
-                      [
-                        { id: "sailor_1", locations:{lat: -27.467, lng: 153.027}},
-                        { id: "sailor_2", locations:{lat: -27.467, lng: 153.027}},
-                        { id: "sailor_3", locations:{lat: -27.467, lng: 153.027}},
-                        { id: "sailor_4", locations:{lat: -27.467, lng: 153.027}},
-                        { id: "sailor_5", locations:{lat: -27.467, lng: 153.027}},
-                        { id: "sailor_6", locations:{lat: -27.467, lng: 153.027}}
-                      ]
-                    ];
-
                     var sailingOpts = {
                       sailor_1: {
-                        strokeColor: '#FF0000'
+                        strokeColor: '#FF0000',
+                        coordinates: [
+                          {lat: 37.772, lng: -122.214},
+                          {lat: 21.291, lng: -157.821},
+                          {lat: -18.444, lng: 178.444},
+                          {lat: -27.467, lng: 153.027}
+                        ]
                       },
                       sailor_2:{
-                        strokeColor: '#00FF00'
+                        strokeColor: '#00FF00',
+                        coordinates: [
+                          {lat: 37.772, lng: -122.214},
+                          {lat: 20.291, lng: -156.821},
+                          {lat: -17.142, lng: 172.431},
+                          {lat: -27.467, lng: 153.027}
+                        ]
                       },
                       sailor_3:{
-                        strokeColor: '#ee4f58'
+                        strokeColor: '#ee4f58',
+                        coordinates: [
+                          {lat: 37.772, lng: -122.214},
+                          {lat: 21.24, lng: -153.821},
+                          {lat: 20.241, lng: -160.841},
+                          {lat: -18.142, lng: 174.431},
+                          {lat: -27.467, lng: 153.027}
+                        ]
                       },
                       sailor_4:{
-                        strokeColor: '#FF22FF'
+                        strokeColor: '#FF22FF',
+                        coordinates: [
+                          {lat: 37.772, lng: -122.214},
+                          {lat: 20.231, lng: -160.83},
+                          {lat: -17.232, lng: 172.221},
+                          {lat: -27.467, lng: 153.027}
+                        ]
                       },
                       sailor_5:{
-                        strokeColor: '#000000'
+                        strokeColor: '#000000',
+                        coordinates: [
+                          {lat: 37.772, lng: -122.214},
+                          {lat: 20.291, lng: -160.821},
+                          {lat: -27.467, lng: 153.027}
+                        ]
                       },
                       sailor_6:{
-                        strokeColor: '#fa8072'
+                        strokeColor: '#fa8072',
+                        coordinates: [
+                          {lat: 37.772, lng: -122.214},
+                          {lat: 21.231, lng: -153.83},
+                          {lat: -18.142, lng: 174.431},
+                          {lat: -27.467, lng: 153.027}
+                        ]
                       },
                     };
 
-                    var inc = 1;
-                    var interval = setInterval(() => {
-                      if(inc < sailingArray.length){
-                        for(var item in sailingArray[inc]){
-                          var sailingPath = new google.maps.Polyline({
-                            path: [sailingArray[inc-1][item].locations, sailingArray[inc][item].locations],
-                            geodesic: true,
-                            strokeColor: sailingOpts[sailingArray[inc][item].id].strokeColor,
-                            strokeOpacity: 1.0,
-                            strokeWeight: 2
-                          });
-                          sailingPath.setMap(map);
-                        }
-                        inc++;
-                      }
-                    }, 2000);
-
-//                    for(var item in sailingOpts){
-//                      var sailingPath = new google.maps.Polyline({
-//                        path: sailingOpts[item].coordinates,
-//                        geodesic: true,
-//                        strokeColor: sailingOpts[item].strokeColor,
-//                        strokeOpacity: 1.0,
-//                        strokeWeight: 2
-//                      });
-//                      sailingPath.setMap(map);
-//                    }
-
-//                    var flightPlanCoordinates = [
-//                      {lat: 37.772, lng: -122.214},
-//                      {lat: 21.291, lng: -157.821},
-//                      {lat: -18.142, lng: 178.431},
-//                      {lat: -27.467, lng: 153.027}
-//                    ];
-//                    var flightPath = new google.maps.Polyline({
-//                      path: flightPlanCoordinates,
-//                      geodesic: true,
-//                      strokeColor: '#FF0000',
-//                      strokeOpacity: 1.0,
-//                      strokeWeight: 2
-//                    });
-//
-//                    var flightPlanCoordinates2 = [
-//                      {lat: 36.772, lng: -121.214},
-//                      {lat: 20.291, lng: -156.821},
-//                      {lat: -17.142, lng: 172.431},
-//                      {lat: -26.467, lng: 151.027}
-//                    ];
-//                    var flightPath2 = new google.maps.Polyline({
-//                      path: flightPlanCoordinates2,
-//                      geodesic: true,
-//                      strokeColor: '#FF00FF',
-//                      strokeOpacity: 1.0,
-//                      strokeWeight: 2
-//                    });
-//
-//                    flightPath.setMap(map);
-//                    flightPath2.setMap(map);
+                    for(var item in sailingOpts){
+                      var sailingPath = new google.maps.Polyline({
+                        path: sailingOpts[item].coordinates,
+                        geodesic: true,
+                        strokeColor: sailingOpts[item].strokeColor,
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2
+                      });
+                      sailingPath.setMap(map);
+                    }
                   }
                 </script>
               </div>
