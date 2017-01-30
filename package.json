@@ -38,5 +38,12 @@
   },
   "eslintConfig": {
     "extends": "google"
+  },
+  "dependencies": {
+    "jquery": "^3.1.1",
+    "jsface": "^2.4.9",
+    "namespace-js": "0.0.1",
+    "requirejs": "^2.3.2",
+    "underscore": "^1.8.3"
   }
 }
