@@ -213,7 +213,7 @@ class RaceMap {
   animateWalk(){
     this.Map = new google.maps.Map(document.getElementById('map'), {
       scrollwheel: false,
-      zoom: 13,
+      zoom: 15,
       center: {"lat": 50.774026666666664, "lng": 15.733386666666666},
       mapTypeId: 'terrain'
     });
@@ -223,6 +223,7 @@ class RaceMap {
 
     this.interval = setMyInterval(() => {
       if(inc < end){
+        // var bounds = new google.maps.LatLngBounds();
         for(let index in shift){
           let path = [{lat: this.locations[inc-1].lat + shift[index], lng: this.locations[inc-1].lng}, {lat: this.locations[inc].lat + shift[index], lng: this.locations[inc].lng}];
           var movePath = new google.maps.Polyline({
@@ -233,9 +234,18 @@ class RaceMap {
             strokeWeight: 2
           });
           movePath.setMap(this.Map);
+          // bounds.extend({lat: this.locations[inc].lat, lng: this.locations[inc].lng});
         }
-
-        // this.Map.setCenter(new google.maps.LatLng(locations[inc].lat, locations[inc].lng));
+        // this.Map.setCenter(bounds.getCenter());
+        // this.Map.fitBounds(bounds);
+        // if(this.Map.getZoom()> 15){
+        //   this.Map.setZoom(15);
+        // } else {
+        //   this.Map.setZoom(this.Map.getZoom()-3);
+        // }
+         // this.Map.fitBounds(bounds);
+        // this.Map.setZoom(this.Map.getZoom()-3);
+        this.Map.setCenter(new google.maps.LatLng(this.locations[inc].lat, this.locations[inc].lng));
         inc++;
       } else{
         clearMyInterval(this.interval);
