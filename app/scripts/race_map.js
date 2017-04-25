@@ -105,16 +105,52 @@ var locations = [
 ];
 
 class RaceMap {
-  constructor(){
+  /**
+   * @param {$} $element - plugin container
+   * @param {Object} opts - plugin options
+   * @property {$} $ - jquery element
+   * @property {Object} opts - plugin options
+   */
+  constructor($element, opts = null) {
+    if (typeof $ === 'undefined') {
+      console.warn('Please load jQuery before RaceMap');
+      return;
+    }
+
+    this.$element = $element;
+    this.$ = $;
+
+    const defaults = {
+      mapSelector: '#map',
+      mapOpts: {
+        scrollwheel: false,
+        zoom: 15,
+        mapTypeId: 'terrain',
+        disableDefaultUI: true
+      }
+    };
+
+    if (opts === null || typeof opts === 'undefined' || this.$.isEmptyObject(opts)) {
+      opts = defaults;
+    } else {
+      opts = this.$.extend(true, defaults, opts);
+    }
+    this.opts = opts;
+
+    this.init();
+  }
+
+  init() {
+    this.setMapContainerHeight();
     this.Map = null;
     this.acriveSpeed = 1000;
     this.interval = null;
-    this.locations = locations
+    this.locations = locations;
     this.createCustomInterval();
-    this.init()
+    this.initMapContainer()
   }
 
-  createCustomInterval(){
+  createCustomInterval() {
     //override the default window.setInterval() function
     window.setMyInterval = (func) => {
       //window.setInterval.count is used to assign a unique intervalId to each interval created
@@ -159,15 +195,24 @@ class RaceMap {
     window.clearMyInterval = function (obj, active = false) {
       //set the active status of the interval associated with the passed object to false
       window.setMyInterval[obj.intervalId].active = active;
-      if(active){
+      if (active) {
         window.setMyInterval[obj.intervalId]();
       }
     }
   }
-  
-  init(){
+
+
+  /**
+   * Initialize map container and add to MAP height as container height
+   */
+  setMapContainerHeight() {
+    this.$mapSelector = this.$element.find(this.opts.mapSelector);
+    // this.$mapSelector.css({height: this.$element.height()});
+  }
+
+  initMapContainer() {
     let checkMap = setInterval(() => {
-      if(typeof google != 'undefined' && typeof $ != 'undefined'){
+      if (typeof google != 'undefined' && typeof $ != 'undefined') {
         clearInterval(checkMap);
         this.initControls();
         $.get('/scripts/json/sample_10000.json', (data) => {
@@ -179,7 +224,7 @@ class RaceMap {
     }, 200);
   }
 
-  initControls(){
+  initControls() {
     this.$controls = $('#map-controls_buttons');
     this.$speedControls = this.$controls.find('[data-speed]');
     this.acriveSpeed = this.$speedControls.siblings('.is-active').data('speed');
@@ -192,7 +237,7 @@ class RaceMap {
       this.acriveSpeed = $target.data('speed');
     });
     this.$restartControls.on('click', () => {
-      if(this.interval){
+      if (this.interval) {
         clearMyInterval(this.interval);
         this.$stopControls[0].innerHTML = 'stop';
       }
@@ -200,7 +245,7 @@ class RaceMap {
     });
     this.$stopControls.on('click', (el) => {
       let target = el.currentTarget;
-      if(this.interval && target.innerHTML === 'stop'){
+      if (this.interval && target.innerHTML === 'stop') {
         clearMyInterval(this.interval);
         target.innerHTML = 'start';
       } else {
@@ -210,22 +255,26 @@ class RaceMap {
     })
   }
 
-  animateWalk(){
+  animateWalk() {
     this.Map = new google.maps.Map(document.getElementById('map'), {
       scrollwheel: false,
       zoom: 15,
       center: {"lat": 50.774026666666664, "lng": 15.733386666666666},
-      mapTypeId: 'terrain'
+      mapTypeId: 'terrain',
+      disableDefaultUI: true
     });
 
     let inc = 1;
     let end = this.locations.length;
 
     this.interval = setMyInterval(() => {
-      if(inc < end){
+      if (inc < end) {
         // var bounds = new google.maps.LatLngBounds();
-        for(let index in shift){
-          let path = [{lat: this.locations[inc-1].lat + shift[index], lng: this.locations[inc-1].lng}, {lat: this.locations[inc].lat + shift[index], lng: this.locations[inc].lng}];
+        for (let index in shift) {
+          let path = [{
+            lat: this.locations[inc - 1].lat + shift[index],
+            lng: this.locations[inc - 1].lng
+          }, {lat: this.locations[inc].lat + shift[index], lng: this.locations[inc].lng}];
           var movePath = new google.maps.Polyline({
             path: path,
             geodesic: true,
@@ -243,13 +292,16 @@ class RaceMap {
         // } else {
         //   this.Map.setZoom(this.Map.getZoom()-3);
         // }
-         // this.Map.fitBounds(bounds);
+        // this.Map.fitBounds(bounds);
         // this.Map.setZoom(this.Map.getZoom()-3);
         this.Map.setCenter(new google.maps.LatLng(this.locations[inc].lat, this.locations[inc].lng));
         inc++;
-      } else{
+      } else {
         clearMyInterval(this.interval);
       }
+
+      //STOP
+      clearMyInterval(this.interval);
     });
 
   }
@@ -332,4 +384,4 @@ class RaceMap {
   }
 }
 
-new RaceMap();
+new RaceMap($('#tracking-map'));
