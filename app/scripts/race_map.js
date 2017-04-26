@@ -268,7 +268,6 @@ class RaceMap {
 
         xdr('http://tomaszd.usermd.net/api/coordinates', 'POST', data, (el) => {
           // do something to response
-          console.log(el);
           this.locations = JSON.parse(el);
           this.animateWalk()
         }, (el) => {
