@@ -1,8 +1,7 @@
 /**
  * Created by marek on 01/30/2017.
  */
-var shift = [0, 0.00002, 0.00004, 0.00006, 0.00008, 0.0001, 0.00012, 0.00014, 0.00016, 0.00017, 0.00018, 0.0002,
-  -0.00002, -0.00004, -0.00006, -0.00008, -0.0001, -0.00012, -0.00014, -0.00016, -0.00017, -0.00018, -0.0002];
+
 var colorMap = ['#000000', '#ff0000', '#ff4000', '#ff8000', '#ffbf00', '#ffff00', '#bfff00', '#00ffbf', '#00ffff', '#00bfff',
   '#0080ff', '#0000ff', '#8000ff', '#bf00ff', '#ff00bf', '#ff0040', '#ff0000', '#936c6c', '#867979', '#808080', '#ff0000', '#00ff00', '#000110'];
 var locations = [
@@ -104,6 +103,49 @@ var locations = [
   }
 ];
 
+
+/**
+ * Make a X-Domain request to url and callback.
+ *
+ * @param url {String}
+ * @param method {String} HTTP verb ('GET', 'POST', 'DELETE', etc.)
+ * @param data {String} request body
+ * @param callback {Function} to callback on completion
+ * @param errback {Function} to callback on error
+ */
+function xdr(url, method, data, callback, errback) {
+  var req;
+
+  if(XMLHttpRequest) {
+    req = new XMLHttpRequest();
+
+    if('withCredentials' in req) {
+      req.open(method, url, true);
+      req.onerror = errback;
+      req.onreadystatechange = function() {
+        if (req.readyState === 4) {
+          if (req.status >= 200 && req.status < 400) {
+            callback(req.responseText);
+          } else {
+            errback(new Error('Response returned with non-OK status'));
+          }
+        }
+      };
+      req.send(data);
+    }
+  } else if(XDomainRequest) {
+    req = new XDomainRequest();
+    req.open(method, url);
+    req.onerror = errback;
+    req.onload = function() {
+      callback(req.responseText);
+    };
+    req.send(data);
+  } else {
+    errback(new Error('CORS not supported'));
+  }
+}
+
 class RaceMap {
   /**
    * @param {$} $element - plugin container
@@ -143,7 +185,7 @@ class RaceMap {
   init() {
     this.setMapContainerHeight();
     this.Map = null;
-    this.acriveSpeed = 1000;
+    this.acriveSpeed = 100;
     this.interval = null;
     this.locations = locations;
     this.createCustomInterval();
@@ -212,79 +254,112 @@ class RaceMap {
 
   initMapContainer() {
     let checkMap = setInterval(() => {
-      if (typeof google != 'undefined' && typeof $ != 'undefined') {
+      if (typeof google !== 'undefined' && typeof $ !== 'undefined') {
         clearInterval(checkMap);
         this.initControls();
-        $.get('/scripts/json/sample_10000.json', (data) => {
-          this.locations = data.locations;
+
+
+
+        let data = new FormData();
+        data.append('competition', 2);
+        data.append('player', 2);
+        // data.append('ago', 30000);
+        // data.append('frequency', 10);
+
+        xdr('http://tomaszd.usermd.net/api/coordinates', 'POST', data, (el) => {
+          // do something to response
+          console.log(el);
+          this.locations = JSON.parse(el);
           this.animateWalk()
-        });
+        }, (el) => {
+          // do something to response
+          console.log(el);
+        })
+
+
+
+        // $.get('/scripts/json/sample_10000.json', (data) => {
+        //   this.locations = data.locations;
+        //   this.animateWalk()
+        // });
 
       }
     }, 200);
   }
 
   initControls() {
-    this.$controls = $('#map-controls_buttons');
-    this.$speedControls = this.$controls.find('[data-speed]');
-    this.acriveSpeed = this.$speedControls.siblings('.is-active').data('speed');
-    this.$restartControls = this.$speedControls.siblings('.restart');
-    this.$stopControls = this.$speedControls.siblings('.stop');
-    this.$speedControls.on('click', (el) => {
-      let $target = $(el.currentTarget);
-      this.$speedControls.removeClass('is-active');
-      $target.addClass('is-active');
-      this.acriveSpeed = $target.data('speed');
-    });
-    this.$restartControls.on('click', () => {
-      if (this.interval) {
-        clearMyInterval(this.interval);
-        this.$stopControls[0].innerHTML = 'stop';
-      }
-      this.animateWalk();
-    });
-    this.$stopControls.on('click', (el) => {
-      let target = el.currentTarget;
-      if (this.interval && target.innerHTML === 'stop') {
-        clearMyInterval(this.interval);
-        target.innerHTML = 'start';
-      } else {
-        clearMyInterval(this.interval, true);
-        target.innerHTML = 'stop';
-      }
-    })
+    // this.$controls = $('#map-controls_buttons');
+    // this.$speedControls = this.$controls.find('[data-speed]');
+    // this.acriveSpeed = this.$speedControls.siblings('.is-active').data('speed');
+    // this.$restartControls = this.$speedControls.siblings('.restart');
+    // this.$stopControls = this.$speedControls.siblings('.stop');
+    // this.$speedControls.on('click', (el) => {
+    //   let $target = $(el.currentTarget);
+    //   this.$speedControls.removeClass('is-active');
+    //   $target.addClass('is-active');
+    //   this.acriveSpeed = $target.data('speed');
+    // });
+    // this.$restartControls.on('click', () => {
+    //   if (this.interval) {
+    //     clearMyInterval(this.interval);
+    //     this.$stopControls[0].innerHTML = 'stop';
+    //   }
+    //   this.animateWalk();
+    // });
+    // this.$stopControls.on('click', (el) => {
+    //   let target = el.currentTarget;
+    //   if (this.interval && target.innerHTML === 'stop') {
+    //     clearMyInterval(this.interval);
+    //     target.innerHTML = 'start';
+    //   } else {
+    //     clearMyInterval(this.interval, true);
+    //     target.innerHTML = 'stop';
+    //   }
+    // })
   }
 
   animateWalk() {
     this.Map = new google.maps.Map(document.getElementById('map'), {
       scrollwheel: false,
       zoom: 15,
-      center: {"lat": 50.774026666666664, "lng": 15.733386666666666},
+      center: {"lat": 51.734688, "lng": 19.472734},
       mapTypeId: 'terrain',
-      disableDefaultUI: true
+      disableDefaultUI: true,
+      draggable: false,
+      zoomControl: false,
+      disableDoubleClickZoom: true
     });
 
     let inc = 1;
     let end = this.locations.length;
 
+    let newArr = {};
+    for(let item of this.locations){
+      newArr[item.t] = {lat: item.lt, lng: item.lg};
+    }
+
+
+    //START 1492753159285 ENDS 1493099948554
+
+    console.log(newArr);
+
+
     this.interval = setMyInterval(() => {
       if (inc < end) {
         // var bounds = new google.maps.LatLngBounds();
-        for (let index in shift) {
-          let path = [{
-            lat: this.locations[inc - 1].lat + shift[index],
-            lng: this.locations[inc - 1].lng
-          }, {lat: this.locations[inc].lat + shift[index], lng: this.locations[inc].lng}];
-          var movePath = new google.maps.Polyline({
-            path: path,
-            geodesic: true,
-            strokeColor: colorMap[index],
-            strokeOpacity: 1.0,
-            strokeWeight: 2
-          });
-          movePath.setMap(this.Map);
-          // bounds.extend({lat: this.locations[inc].lat, lng: this.locations[inc].lng});
-        }
+        let path = [{
+          lat: this.locations[inc - 1].lt,
+          lng: this.locations[inc - 1].lg
+        }, {lat: this.locations[inc].lt, lng: this.locations[inc].lg}];
+
+        var movePath = new google.maps.Polyline({
+          path: path,
+          geodesic: true,
+          strokeColor: colorMap[1],
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        });
+        movePath.setMap(this.Map);
         // this.Map.setCenter(bounds.getCenter());
         // this.Map.fitBounds(bounds);
         // if(this.Map.getZoom()> 15){
@@ -294,14 +369,14 @@ class RaceMap {
         // }
         // this.Map.fitBounds(bounds);
         // this.Map.setZoom(this.Map.getZoom()-3);
-        this.Map.setCenter(new google.maps.LatLng(this.locations[inc].lat, this.locations[inc].lng));
+        this.Map.setCenter(new google.maps.LatLng(this.locations[inc].lt, this.locations[inc].lg));
         inc++;
       } else {
         clearMyInterval(this.interval);
       }
 
       //STOP
-      clearMyInterval(this.interval);
+      // clearMyInterval(this.interval);
     });
 
   }
